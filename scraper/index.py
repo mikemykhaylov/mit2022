@@ -15,6 +15,9 @@ def hello_http():
     repo.index.reset("origin/main", hard=True)
     print(repo.active_branch)
 
+    for f in os.listdir("/tmp/mit2022/www"):
+        os.remove(os.path.join("/tmp/mit2022/www", f))
+
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--headless")
@@ -33,18 +36,26 @@ def hello_http():
         file_path = f"/tmp/mit2022/www/{js.split('/')[-1].split('?')[0]}"
         open(file_path, "wb").write(r.content)
 
-    driver.close()
     driver.quit()
 
-    diffs = repo.git.diff(None, **{"name-only": True}).split("\n")
+    added = repo.untracked_files
+    modified = [obj.b_path for obj in repo.index.diff(None) if obj.change_type == 'M']
+    deleted = [obj.b_path for obj in repo.index.diff(None) if obj.change_type == 'D']
 
     date_string = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     bot_message = f"{date_string}\n"
 
-    if not diffs[0]:
-        bot_message += "No changes detected"
+    if len(added) + len(modified) + len(deleted) == 0:
+        print("No changes detected")
     else:
-        bot_message += f"{len(diffs)} file(s) changed:\n" + "\n".join(diffs)
+        print("Changes detected, sending message")
+        bot_message += f"{len(added) + len(modified) + len(deleted)} file(s) changed:\n\n"
+        if(len(added) > 0):
+            bot_message += "Added: \n" + "\n".join(added) + "\n\n"
+        if(len(modified) > 0):
+            bot_message += "Modified: \n" + "\n".join(modified) + "\n\n"
+        if(len(deleted) > 0):
+            bot_message += "Deleted: \n" + "\n".join(deleted) + "\n\n"
         bot_token = os.getenv("BOT_TOKEN")
         channel_id = os.getenv("CHANNEL_ID")
         r = requests.post(
