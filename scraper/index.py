@@ -36,6 +36,8 @@ def hello_http():
         file_path = f"/tmp/mit2022/www/{js.split('/')[-1].split('?')[0]}"
         open(file_path, "wb").write(r.content)
 
+    os.remove(os.path.join("/tmp/mit2022/www", "js"))
+
     driver.quit()
 
     added = repo.untracked_files
