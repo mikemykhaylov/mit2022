@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 
 def hello_http():
     if not os.path.exists("/tmp/mit2022"):
-        git.Repo.clone_from("https://github.com/mmykhaylov/mit2022.git", "/tmp/mit2022")
+        git.Repo.clone_from("https://github.com/mikemykhaylov/mit2022.git", "/tmp/mit2022")
 
     repo = git.Repo("/tmp/mit2022")
     repo.remote().fetch()
